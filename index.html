@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Vanzz IA · DeepSeek Intelligence</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 20% 30%, #0a0a0c, #030305);
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* glassmorphism + dark gold theme */
+        .app-container {
+            max-width: 1400px;
+            width: 100%;
+            height: 90vh;
+            background: rgba(10, 10, 15, 0.65);
+            backdrop-filter: blur(14px);
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,215,0,0.15);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* header premium */
+        .header {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #0f0f16 0%, #07070c 100%);
+            border-bottom: 2px solid #d4af37;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .brand h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #F5E7A3, #D4AF37);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .badge {
+            background: rgba(212, 175, 55, 0.2);
+            border-radius: 60px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #d4af37;
+            border: 1px solid #d4af3740;
+        }
+
+        .api-section {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: #0a0a0fcc;
+            padding: 6px 18px;
+            border-radius: 100px;
+            backdrop-filter: blur(4px);
+        }
+
+        .api-input {
+            background: #111118;
+            border: 1px solid #d4af3766;
+            padding: 8px 16px;
+            border-radius: 60px;
+            color: #f0f0f0;
+            font-family: monospace;
+            font-size: 0.8rem;
+            width: 280px;
+            transition: 0.2s;
+        }
+
+        .api-input:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 8px rgba(212,175,55,0.4);
+        }
+
+        .save-key-btn {
+            background: #d4af37;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: #0a0a0a;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .save-key-btn:hover {
+            background: #ffdd66;
+            box-shadow: 0 0 8px gold;
+        }
+
+        /* main chat area */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        /* custom scroll */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-messages::-webkit-scrollbar-track {
+            background: #1a1a24;
+            border-radius: 10px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #d4af37;
+            border-radius: 10px;
+        }
+
+        /* message bubbles */
+        .message {
+            display: flex;
+            gap: 14px;
+            max-width: 85%;
+            animation: fadeSlideUp 0.25s ease;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(145deg, #1e1e2a, #0b0b12);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            border: 1px solid #d4af3766;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .user .avatar {
+            background: #d4af371c;
+            border-color: #d4af37;
+        }
+
+        .bubble {
+            background: #14161f;
+            padding: 14px 20px;
+            border-radius: 24px;
+            border-bottom-left-radius: 6px;
+            color: #eef2ff;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            word-break: break-word;
+            border: 1px solid #2a2a36;
+        }
+
+        .user .bubble {
+            background: linear-gradient(135deg, #1f232f, #151824);
+            border-bottom-right-radius: 6px;
+            border-bottom-left-radius: 24px;
+            border: 1px solid #d4af3766;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 6px;
+            padding: 12px 20px;
+            background: #14161f;
+            width: fit-content;
+            border-radius: 30px;
+            align-items: center;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #d4af37;
+            border-radius: 50%;
+            display: inline-block;
+            animation: blink 1.2s infinite ease;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0%, 60%, 100% { opacity: 0.3; transform: scale(0.8);}
+            30% { opacity: 1; transform: scale(1.2);}
+        }
+
+        /* input area */
+        .input-area {
+            background: #0c0c12e6;
+            padding: 18px 24px;
+            border-top: 1px solid #d4af3740;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            backdrop-filter: blur(12px);
+        }
+
+        .message-input {
+            flex: 1;
+            background: #11131e;
+            border: 1px solid #2f2f3a;
+            border-radius: 60px;
+            padding: 14px 22px;
+            font-size: 1rem;
+            color: #f5f5f5;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 0 2px rgba(212,175,55,0.3);
+        }
+
+        .send-btn {
+            background: #d4af37;
+            border: none;
+            width: 52px;
+            height: 52px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1.4rem;
+        }
+
+        .send-btn:hover {
+            background: #ffdd77;
+            transform: scale(1.02);
+            box-shadow: 0 0 10px gold;
+        }
+
+        .clear-btn {
+            background: transparent;
+            border: 1px solid #d4af3766;
+            padding: 10px 18px;
+            border-radius: 40px;
+            color: #d4af37;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .clear-btn:hover {
+            background: #d4af371a;
+            border-color: #d4af37;
+        }
+
+        /* status */
+        .status-text {
+            font-size: 0.7rem;
+            color: #a9a9b5;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(12px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        @media (max-width: 750px) {
+            .header { flex-direction: column; align-items: stretch; }
+            .api-section { justify-content: space-between; flex-wrap: wrap; }
+            .api-input { width: 100%; }
+            .message { max-width: 95%; }
+            .brand h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="header">
+        <div class="brand">
+            <h1>⚡ VANZZ IA</h1>
+            <div class="badge">DEEPSEEK CORE</div>
+        </div>
+        <div class="api-section">
+            <input type="password" id="apiKeyInput" class="api-input" placeholder="Insira sua DeepSeek API Key" autocomplete="off">
+            <button id="saveApiBtn" class="save-key-btn">🔑 Ativar</button>
+            <button id="clearChatBtn" class="clear-btn">🧹 Limpar conversa</button>
+        </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <div class="message assistant">
+            <div class="avatar">🤖</div>
+            <div class="bubble">
+                ✨ Olá, sou a <strong>Vanzz IA</strong>! <br>
+                Sou baseada no modelo DeepSeek. <br>
+                Configure sua API key (obtenha em <a href="https://platform.deepseek.com/api_keys" target="_blank" style="color:#d4af37;">DeepSeek Platform</a>) e comece a conversar.
+            </div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="messageInput" class="message-input" placeholder="Digite sua mensagem... (pressione Enter)" autofocus>
+        <button id="sendBtn" class="send-btn">➤</button>
+    </div>
+    <div class="status-text" id="statusMsg">⚡ IA offline • insira a chave para ativar</div>
+</div>
+
+<script>
+    // -------------------  VANZZ IA - DeepSeek Integration -------------------
+    // Configurações
+    const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
+    let API_KEY = localStorage.getItem("vanzz_deepseek_key") || "";
+    let conversationHistory = [];   // armazena {role, content}
+    
+    // DOM elements
+    const chatContainer = document.getElementById("chatMessages");
+    const messageInput = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const saveApiBtn = document.getElementById("saveApiBtn");
+    const apiKeyInput = document.getElementById("apiKeyInput");
+    const clearChatBtn = document.getElementById("clearChatBtn");
+    const statusSpan = document.getElementById("statusMsg");
+    
+    // carregar chave salva no input
+    if(API_KEY) {
+        apiKeyInput.value = "••••••••••••••••••••••";
+        statusSpan.innerHTML = "✅ API Key carregada • Vanzz IA pronta";
+    } else {
+        statusSpan.innerHTML = "⚠️ Nenhuma chave encontrada • insira sua DeepSeek API key";
+    }
+    
+    // salvar chave
+    function setApiKey() {
+        let rawKey = apiKeyInput.value.trim();
+        if(rawKey === "••••••••••••••••••••••" && API_KEY) {
+            // mantém a atual
+            statusSpan.innerHTML = "🔑 Chave já definida. (para trocar, cole uma nova)";
+            return;
+        }
+        if(!rawKey) {
+            statusSpan.innerHTML = "❌ Insira uma API key válida da DeepSeek";
+            return;
+        }
+        API_KEY = rawKey;
+        localStorage.setItem("vanzz_deepseek_key", API_KEY);
+        apiKeyInput.value = "••••••••••••••••••••••";
+        statusSpan.innerHTML = "✅ Chave salva com sucesso! Agora você pode conversar.";
+    }
+    
+    // Adicionar mensagem na tela
+    function addMessageToUI(role, content, isStream = false) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${role}`;
+        const avatar = role === "user" ? "👤" : "⚡";
+        const avatarHTML = `<div class="avatar">${avatar}</div>`;
+        const bubbleHTML = `<div class="bubble">${formatMessage(content)}</div>`;
+        messageDiv.innerHTML = avatarHTML + bubbleHTML;
+        chatContainer.appendChild(messageDiv);
+        messageDiv.scrollIntoView({ behavior: "smooth", block: "end" });
+        return messageDiv;
+    }
+    
+    // formatação simples (links, quebras)
+    function formatMessage(text) {
+        let formatted = text.replace(/\n/g, '<br>');
+        formatted = formatted.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:#d4af37;">$1</a>');
+        return formatted;
+    }
+    
+    // indicador de digitação
+    let typingIndicator = null;
+    function showTyping() {
+        removeTyping();
+        const typingDiv = document.createElement("div");
+        typingDiv.className = "message assistant";
+        typingDiv.id = "typingIndicator";
+        typingDiv.innerHTML = `<div class="avatar">⚡</div><div class="typing-indicator"><span></span><span></span><span></span></div>`;
+        chatContainer.appendChild(typingDiv);
+        typingDiv.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+    
+    function removeTyping() {
+        const existing = document.getElementById("typingIndicator");
+        if(existing) existing.remove();
+    }
+    
+    // chamada para API DeepSeek
+    async function sendMessageToDeepSeek(userMessage) {
+        if(!API_KEY) {
+            statusSpan.innerHTML = "❌ ERRO: Insira sua DeepSeek API key antes de conversar.";
+            addMessageToUI("assistant", "🔐 Por favor, configure sua chave de API no campo acima e clique em ATIVAR.");
+            return false;
+        }
+        
+        // Adiciona mensagem do usuário no histórico
+        conversationHistory.push({ role: "user", content: userMessage });
+        
+        // Construir payload (mantém contexto)
+        const messages = [
+            { role: "system", content: "Você é a Vanzz IA, uma assistente inteligente, profissional, elegante e precisa. Seu tom é sofisticado, respostas detalhadas e sempre ajuda com clareza. Estilo dark/gold. Use português do Brasil." },
+            ...conversationHistory
+        ];
+        
+        try {
+            showTyping();
+            statusSpan.innerHTML = "🧠 VANZZ pensando...";
+            
+            const response = await fetch(DEEPSEEK_API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "deepseek-chat",
+                    messages: messages,
+                    temperature: 0.7,
+                    max_tokens: 2000,
+                    stream: false
+                })
+            });
+            
+            removeTyping();
+            
+            if(!response.ok) {
+                let errorDetail = "";
+                try {
+                    const errData = await response.json();
+                    errorDetail = errData.error?.message || JSON.stringify(errData);
+                } catch(e) { errorDetail = response.statusText; }
+                throw new Error(`API Error ${response.status}: ${errorDetail}`);
+            }
+            
+            const data = await response.json();
+            const assistantReply = data.choices[0].message.content;
+            
+            // guardar resposta no histórico
+            conversationHistory.push({ role: "assistant", content: assistantReply });
+            addMessageToUI("assistant", assistantReply);
+            statusSpan.innerHTML = "✅ Vanzz IA respondendo • pronto para nova pergunta";
+            return true;
+        } catch (error) {
+            removeTyping();
+            console.error("DeepSeek error:", error);
+            let errorMsg = "⚠️ Erro na comunicação com a IA. ";
+            if(error.message.includes("401")) errorMsg = "🔑 Chave inválida ou sem créditos. Verifique sua DeepSeek API Key.";
+            else if(error.message.includes("429")) errorMsg = "⏳ Limite de requisições excedido. Tente novamente mais tarde.";
+            else if(error.message.includes("fetch")) errorMsg = "🌐 Falha de rede. Verifique sua conexão.";
+            else errorMsg += error.message;
+            addMessageToUI("assistant", `❌ ${errorMsg}`);
+            statusSpan.innerHTML = "⚠️ Falha na requisição. Verifique a chave e tente novamente.";
+            // remove a ultima mensagem do usuário do histórico se falhou? manter para retentativa
+            conversationHistory.pop(); // remove a user msg que causou erro para não duplicar
+            return false;
+        }
+    }
+    
+    // fluxo de envio principal
+    async function handleSendMessage() {
+        const userText = messageInput.value.trim();
+        if(!userText) return;
+        
+        // exibir mensagem do usuário
+        addMessageToUI("user", userText);
+        messageInput.value = "";
+        messageInput.focus();
+        
+        // enviar para DeepSeek
+        await sendMessageToDeepSeek(userText);
+    }
+    
+    // Limpar conversa local (mantém apenas saudação inicial)
+    function clearConversation() {
+        conversationHistory = [];
+        // resetar UI: manter apenas mensagem padrão de boas-vindas
+        while(chatContainer.firstChild) {
+            chatContainer.removeChild(chatContainer.firstChild);
+        }
+        // recriar mensagem inicial da Vanzz IA
+        const welcomeDiv = document.createElement("div");
+        welcomeDiv.className = "message assistant";
+        welcomeDiv.innerHTML = `<div class="avatar">⚡</div><div class="bubble">
+            ✨ Conversa reiniciada. Sou a <strong>Vanzz IA</strong>.<br>
+            Estou pronta para ajudar com tecnologia, perguntas ou qualquer assunto.
+        </div>`;
+        chatContainer.appendChild(welcomeDiv);
+        statusSpan.innerHTML = "🧹 Histórico limpo. Continue conversando!";
+    }
+    
+    // Event listeners
+    sendBtn.addEventListener("click", handleSendMessage);
+    messageInput.addEventListener("keypress", (e) => {
+        if(e.key === "Enter") {
+            e.preventDefault();
+            handleSendMessage();
+        }
+    });
+    
+    saveApiBtn.addEventListener("click", () => {
+        const newKey = apiKeyInput.value.trim();
+        if(newKey && newKey !== "••••••••••••••••••••••") {
+            API_KEY = newKey;
+            localStorage.setItem("vanzz_deepseek_key", API_KEY);
+            apiKeyInput.value = "••••••••••••••••••••••";
+            statusSpan.innerHTML = "🔑 Chave atualizada com sucesso! A Vanzz IA está ativa.";
+        } else if(API_KEY) {
+            statusSpan.innerHTML = "✅ Chave já estava ativa. Nenhuma alteração.";
+        } else {
+            statusSpan.innerHTML = "⚠️ Cole uma chave válida no campo acima.";
+        }
+    });
+    
+    clearChatBtn.addEventListener("click", clearConversation);
+    
+    // Inicialização: carregar possível chave já salva e não armazenar histórico extra
+    if(API_KEY) {
+        statusSpan.innerHTML = "✨ Vanzz IA pronta • DeepSeek conectada";
+    } else {
+        // mensagem amigável
+        const infoMsg = document.createElement("div");
+        infoMsg.className = "message assistant";
+        infoMsg.innerHTML = `<div class="avatar">🔐</div><div class="bubble">
+            Para usar a Vanzz IA, insira sua DeepSeek API key no campo superior e clique em "Ativar".<br>
+            <strong>🔗 Obtenha sua chave gratuitamente em:</strong> <a href="https://platform.deepseek.com/api_keys" target="_blank" style="color:#d4af37;">platform.deepseek.com/api_keys</a>
+        </div>`;
+        chatContainer.appendChild(infoMsg);
+    }
+    
+    // verificar se a chave é válida de forma assíncrona com mensagem simples
+    async function testKeyOnLoad() {
+        if(API_KEY) {
+            // teste rápido: ping com uma pergunta mínima sem bagunçar historico
+            try {
+                const testResponse = await fetch(DEEPSEEK_API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek-chat",
+                        messages: [{ role: "user", content: "ok" }],
+                        max_tokens: 5
+                    })
+                });
+                if(!testResponse.ok) {
+                    statusSpan.innerHTML = "⚠️ Chave inválida ou sem permissão. Atualize sua API key.";
+                } else {
+                    statusSpan.innerHTML = "✅ Vanzz IA online • DeepSeek ativo";
+                }
+            } catch(e) {
+                statusSpan.innerHTML = "🌐 Não foi possível validar a chave agora, mas as requisições serão tentadas.";
+            }
+        }
+    }
+    testKeyOnLoad();
+</script>
+</body>
+</html>
